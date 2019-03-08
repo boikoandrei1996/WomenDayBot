@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using WomanDayBot.Models;
+using WomenDay.Models;
 
-namespace WomanDayBot.Services
+namespace WomenDay.Services
 {
   public interface ICardService
   {

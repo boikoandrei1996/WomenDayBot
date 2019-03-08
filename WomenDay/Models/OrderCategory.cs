@@ -1,4 +1,4 @@
-﻿namespace WomanDayBot.Models
+﻿namespace WomenDay.Models
 {
   public enum OrderCategory : long
   {

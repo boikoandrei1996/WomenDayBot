@@ -3,19 +3,19 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WomanDayBot.Models;
-using WomanDayBot.Repositories;
+using WomenDay.Models;
+using WomenDay.Repositories;
 
-namespace WomanDayBot.Web.Controllers
+namespace WomenDay.Web.Controllers
 {
   [Route("api/[controller]")]
   public class OrdersController : Controller
   {
-    private readonly ILogger<WomanDayBotBot> _logger;
+    private readonly ILogger<Bot> _logger;
     private readonly OrderRepository _orderRepository;
     public OrdersController(ILoggerFactory loggerFactory, OrderRepository orderRepository)
     {
-      _logger = loggerFactory.CreateLogger<WomanDayBotBot>();
+      _logger = loggerFactory.CreateLogger<Bot>();
       _orderRepository = orderRepository;
     }
 

@@ -8,9 +8,9 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
-using WomanDayBot.Models;
+using WomenDay.Models;
 
-namespace WomanDayBot.Dialogs
+namespace WomenDay.Dialogs
 {
   /// <summary>Defines a dialog for collecting a user's name.</summary>
   public class MainDialogSet : DialogSet

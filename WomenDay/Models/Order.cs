@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace WomanDayBot.Models
+namespace WomenDay.Models
 {
   public class Order
   {

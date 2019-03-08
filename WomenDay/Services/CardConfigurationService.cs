@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using WomanDayBot.Models;
-using WomanDayBot.Repositories;
+using WomenDay.Models;
+using WomenDay.Repositories;
 
-namespace WomanDayBot.Services
+namespace WomenDay.Services
 {
   public interface ICardConfigurationService
   {

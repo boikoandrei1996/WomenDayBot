@@ -1,4 +1,4 @@
-﻿namespace WomanDayBot.Models
+﻿namespace WomenDay.Models
 {
   /// <summary>
   /// Class for storing persistent user data.

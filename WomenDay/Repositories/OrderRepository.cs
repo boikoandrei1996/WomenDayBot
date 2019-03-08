@@ -1,7 +1,7 @@
 ﻿using Microsoft.Bot.Builder.Azure;
-using WomanDayBot.Models;
+using WomenDay.Models;
 
-namespace WomanDayBot.Repositories
+namespace WomenDay.Repositories
 {
   using System.Linq;
   using System.Threading.Tasks;

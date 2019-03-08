@@ -7,19 +7,19 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using WomanDayBot.Dialogs;
-using WomanDayBot.Models;
-using WomanDayBot.Repositories;
-using WomanDayBot.Services;
+using WomenDay.Dialogs;
+using WomenDay.Models;
+using WomenDay.Repositories;
+using WomenDay.Services;
 
-namespace WomanDayBot
+namespace WomenDay
 {
   /// <summary>
   /// Main entry point and orchestration for bot.
   /// </summary>
-  public class WomanDayBotBot : IBot
+  public class Bot : IBot
   {
-    private readonly ILogger<WomanDayBotBot> _logger;
+    private readonly ILogger<Bot> _logger;
     private readonly WomanDayBotAccessors _accessors;
     private readonly MainDialogSet _mainDialogSet;
     private readonly UserState _userState;
@@ -27,7 +27,7 @@ namespace WomanDayBot
     private readonly ICardService _cardService;
     private readonly OrderRepository _orderRepository;
 
-    public WomanDayBotBot(
+    public Bot(
       ILoggerFactory loggerFactory,
       WomanDayBotAccessors womanDayBotAccessors,
       UserState userState,
@@ -35,7 +35,7 @@ namespace WomanDayBot
       ICardService cardService,
       OrderRepository orderRepository)
     {
-      _logger = loggerFactory.CreateLogger<WomanDayBotBot>();
+      _logger = loggerFactory.CreateLogger<Bot>();
       _accessors = womanDayBotAccessors ?? throw new ArgumentNullException(nameof(womanDayBotAccessors));
       _userState = userState ?? throw new ArgumentNullException(nameof(userState));
       _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));

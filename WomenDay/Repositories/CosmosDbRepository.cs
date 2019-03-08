@@ -8,9 +8,9 @@ using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using Microsoft.Bot.Builder.Azure;
-using WomanDayBot.Models;
+using WomenDay.Models;
 
-namespace WomanDayBot.Repositories
+namespace WomenDay.Repositories
 {
   public class CosmosDbRepository<T> where T : class
   {

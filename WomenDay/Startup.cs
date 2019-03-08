@@ -14,23 +14,23 @@ using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using WomanDayBot.Models;
-using WomanDayBot.Repositories;
-using WomanDayBot.Services;
+using WomenDay.Models;
+using WomenDay.Repositories;
+using WomenDay.Services;
 
-namespace WomanDayBot
+namespace WomenDay
 {
   public class Startup
   {
     private readonly bool _isProduction = false;
-    private readonly ILogger<WomanDayBotBot> _logger;
+    private readonly ILogger<Bot> _logger;
 
     public IConfiguration Configuration { get; }
 
     public Startup(IHostingEnvironment env, ILoggerFactory loggerFactory)
     {
       _isProduction = env.IsProduction();
-      _logger = loggerFactory.CreateLogger<WomanDayBotBot>();
+      _logger = loggerFactory.CreateLogger<Bot>();
 
       Configuration = new ConfigurationBuilder()
         .SetBasePath(env.ContentRootPath)
@@ -113,7 +113,7 @@ namespace WomanDayBot
       services.AddSingleton<ICardConfigurationService, CardConfigurationService>();
       services.AddSingleton<ICardService, CardService>();
 
-      services.AddBot<WomanDayBotBot>(options =>
+      services.AddBot<Bot>(options =>
       {
         options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using WomanDayBot.Models;
+using WomenDay.Models;
 
-namespace WomanDayBot
+namespace WomenDay
 {
   public class WomanDayBotAccessors
   {
