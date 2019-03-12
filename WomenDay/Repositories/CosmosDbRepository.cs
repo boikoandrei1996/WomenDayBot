@@ -98,6 +98,19 @@ namespace WomenDay.Repositories
       }
     }
 
+    public async Task<Document> UpdatePropertyAsync(string documentId, string propertyName, object propertyValue)
+    {
+      var document = this.GetDocumentOrDefault(x => x.Id == documentId);
+      if (document != null)
+      {
+        document.SetPropertyValue(propertyName, propertyValue);
+
+        return await this.UpdateDocumentAsync(document);
+      }
+
+      return null;
+    }
+
     public async Task<ResourceResponse<Document>> DeleteDocumentAsync(string documentId)
     {
       var documentUri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, documentId);

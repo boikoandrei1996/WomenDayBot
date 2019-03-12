@@ -2,27 +2,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using WomenDay.Models;
 using WomenDay.Repositories;
 
 namespace WomenDay.Web.Controllers
 {
   [Route("api/[controller]")]
-  public class OrdersController : Controller
+  public class OrderController : Controller
   {
-    private readonly ILogger<Bot> _logger;
     private readonly OrderRepository _orderRepository;
 
-    public OrdersController(
-      ILogger<Bot> logger, 
+    public OrderController(
       OrderRepository orderRepository)
     {
-      _logger = logger;
       _orderRepository = orderRepository;
     }
 
-    // GET api/orders/all
+    // GET api/order/all
     [HttpGet("all")]
     public async Task<IEnumerable<Order>> GetOrdersAsync()
     {
@@ -31,7 +27,7 @@ namespace WomenDay.Web.Controllers
       return orders.OrderBy(x => x.RequestTime);
     }
 
-    // PUT api/orders
+    // PUT api/order
     [HttpPut]
     public async Task<IActionResult> UpdateOrderAsync([FromBody]Order order)
     {

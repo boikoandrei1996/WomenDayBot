@@ -1,12 +1,12 @@
-#incompleted-orders{
+.orders-row {
   overflow-y: scroll;
 }
 
-#incompleted-orders span{
+  .orders-row span {
     font-size: 2em;
-}
+  }
 
-#row{
-    height: 100%;
-    margin-bottom: 0;
+#row {
+  height: 100%;
+  margin-bottom: 0;
 }

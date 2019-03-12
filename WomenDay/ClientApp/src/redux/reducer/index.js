@@ -1,4 +1,4 @@
-﻿import { RECEIVE_ORDERS, REQUEST_ORDERS } from '../constants/index'
+﻿import { RECEIVE_ORDERS, REQUEST_ORDERS } from '../constants/index';
 
 const initialState = { orders: [] };
 
@@ -7,7 +7,7 @@ export const actionCreators = {
 
     dispatch({ type: REQUEST_ORDERS });
 
-    const url = `api/orders/all`;
+    const url = `api/order/all`;
     const response = await fetch(url);
     const orders = await response.json();
 
@@ -20,7 +20,7 @@ export const actionCreators = {
     const index = orders.findIndex(obj => obj.orderId === orderId);
 
     orders[index].isComplete = isComplete;
-    const url = `api/orders`;
+    const url = `api/order`;
     const response = await fetch(url, {
       method: 'PUT',
       headers: {

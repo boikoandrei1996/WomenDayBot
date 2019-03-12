@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WomenDay.Dialogs;
 using WomenDay.Models;
@@ -19,30 +18,21 @@ namespace WomenDay
   /// </summary>
   public class Bot : IBot
   {
-    private readonly ILogger<Bot> _logger;
     private readonly BotAccessors _accessors;
     private readonly MainDialogSet _mainDialogSet;
-    private readonly UserState _userState;
-    private readonly ConversationState _conversationState;
     private readonly ICardService _cardService;
     private readonly OrderRepository _orderRepository;
 
     public Bot(
       BotAccessors botAccessors,
-      UserState userState,
-      ConversationState conversationState,
       ICardService cardService,
-      OrderRepository orderRepository,
-      ILogger<Bot> logger)
+      OrderRepository orderRepository)
     {
       _accessors = botAccessors ?? throw new ArgumentNullException(nameof(botAccessors));
-      _userState = userState ?? throw new ArgumentNullException(nameof(userState));
-      _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
       _cardService = cardService ?? throw new ArgumentNullException(nameof(cardService));
       _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-      _logger = logger;
 
-      _mainDialogSet = new MainDialogSet(_accessors.DialogStateAccessor, new GreetingDialog(), new CategoryChooseDialog(), new UserNameValidator());
+      _mainDialogSet = new MainDialogSet(_accessors.DialogStateAccessor);
     }
 
     public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken)
@@ -59,20 +49,15 @@ namespace WomenDay
       {
         if (string.IsNullOrEmpty(userData.Name) || string.IsNullOrEmpty(userData.Room))
         {
-          // Start greeting dialog
-          await dialogContext.BeginDialogAsync(GreetingDialog.Id, null, cancellationToken);
+          await this.StartGreetingDialogAsync(dialogContext, cancellationToken);
         }
         else if (turnContext.Activity.Value == null)
         {
-          // Start category choose dialog
-          await turnContext.SendActivityAsync($"Хаю хай {userData.Name} из {userData.Room}.", cancellationToken: cancellationToken);
-          await dialogContext.BeginDialogAsync(CategoryChooseDialog.Id, null, cancellationToken);
+          await this.StartCategoryChooseDialogAsync(dialogContext, userData, cancellationToken);
         }
         else
         {
-          // Register order
-          await this.RegisterOrderAsync(turnContext.Activity.Value, userData, cancellationToken);
-          await turnContext.SendActivityAsync("Мы уже летим, красотка. брымбрымбрым....", cancellationToken: cancellationToken);
+          await this.RegisterOrderAsync(turnContext, turnContext.Activity.Value, userData, cancellationToken);
         }
       }
       else if (dialogTurnResult.Status == DialogTurnStatus.Complete)
@@ -87,8 +72,7 @@ namespace WomenDay
             userData,
             cancellationToken);
 
-          await turnContext.SendActivityAsync($"Добро пожаловать, {userData.Name} из {userData.Room}.", cancellationToken: cancellationToken);
-          await dialogContext.BeginDialogAsync(CategoryChooseDialog.Id, null, cancellationToken);
+          await this.StartCategoryChooseDialogAsync(dialogContext, userData, cancellationToken);
         }
         else if (dialogTurnResult.Result is OrderCategory)
         {
@@ -104,7 +88,19 @@ namespace WomenDay
       await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
     }
 
+    private Task StartGreetingDialogAsync(DialogContext dialogContext, CancellationToken cancellationToken)
+    {
+      return dialogContext.BeginDialogAsync(GreetingDialog.Id, null, cancellationToken);
+    }
+
+    private async Task StartCategoryChooseDialogAsync(DialogContext dialogContext, UserData userData, CancellationToken cancellationToken)
+    {
+      await dialogContext.Context.SendActivityAsync($"Хаю хай {userData.Name} из {userData.Room}.", cancellationToken: cancellationToken);
+      await dialogContext.BeginDialogAsync(CategoryChooseDialog.Id, null, cancellationToken);
+    }
+
     private async Task RegisterOrderAsync(
+      ITurnContext turnContext,
       object value,
       UserData userData,
       CancellationToken cancellationToken)
@@ -115,8 +111,9 @@ namespace WomenDay
       order.RequestTime = DateTime.Now;
       order.UserData = userData;
 
-      var document = await _orderRepository.CreateDocumentAsync(order);
-      _logger.LogDebug("Created {orderDoc}", document);
+      await _orderRepository.CreateDocumentAsync(order);
+
+      await turnContext.SendActivityAsync("Мы уже летим, красотка. брымбрымбрым....", cancellationToken: cancellationToken);
     }
 
     private async Task ShowMenuAsync(
@@ -125,6 +122,7 @@ namespace WomenDay
       CancellationToken cancellationToken)
     {
       var attachments = await _cardService.CreateAttachmentsAsync(category);
+
       if (attachments.Any())
       {
         var reply = turnContext.Activity.CreateReply();
