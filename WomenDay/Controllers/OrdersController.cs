@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,7 @@ namespace WomenDay.Web.Controllers
     {
       var orders = await _orderRepository.GetItemsAsync();
 
-      return orders;
+      return orders.OrderBy(x => x.RequestTime);
     }
 
     // PUT api/orders
