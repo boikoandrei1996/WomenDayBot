@@ -7,8 +7,10 @@ namespace WomenDay.Models
   {
     [JsonProperty(PropertyName = "id")]
     public Guid DocumentId { get; set; }
+
     [JsonProperty(PropertyName = "orderId")]
     public Guid OrderId { get; set; }
+
     public string OrderType { get; set; }
     public string OrderCategory { get; set; }
     public bool IsComplete { get; set; }

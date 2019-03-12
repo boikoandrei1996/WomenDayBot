@@ -19,8 +19,12 @@ namespace WomenDay.Models
       this.OrderCategory = orderCategory;
     }
 
-    [JsonProperty(PropertyName = "cardconfigid")]
-    public Guid CardConfigurationId { get; private set; }
+    [JsonProperty(PropertyName = "id")]
+    public Guid DocumentId { get; set; }
+
+    [JsonProperty(PropertyName = "configId")]
+    public Guid ConfigId { get; set; }
+
     public string ImageUrl { get; private set; }
     public string TitleText { get; private set; }
     public string Description { get; private set; }

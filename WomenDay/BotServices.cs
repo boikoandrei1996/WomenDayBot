@@ -19,10 +19,6 @@ namespace WomenDay
   //  See https://www.luis.ai/home" for more information regarding language understanding using LUIS
   public class BotServices
   {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BotServices"/> class.
-    /// <param name="botConfiguration">A dictionary of named <see cref="BotConfiguration"/> instances for usage within the bot.</param>
-    /// </summary>
     public BotServices(BotConfiguration botConfiguration)
     {
       foreach (var service in botConfiguration.Services)
@@ -39,6 +35,7 @@ namespace WomenDay
 
             var app = new LuisApplication(luis.AppId, luis.AuthoringKey, luis.GetEndpoint());
             var recognizer = new LuisRecognizer(app);
+
             this.LuisServices.Add(luis.Name, recognizer);
             break;
           }

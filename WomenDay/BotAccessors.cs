@@ -5,7 +5,7 @@ using WomenDay.Models;
 
 namespace WomenDay
 {
-  public class WomanDayBotAccessors
+  public class BotAccessors
   {
     public UserState UserState { get; }
 
@@ -15,7 +15,7 @@ namespace WomenDay
 
     public IStatePropertyAccessor<UserData> UserDataAccessor { get; set; }
 
-    public WomanDayBotAccessors(UserState userState, ConversationState conversationState)
+    public BotAccessors(UserState userState, ConversationState conversationState)
     {
       this.UserState = userState ?? throw new ArgumentNullException(nameof(userState));
       this.ConversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));

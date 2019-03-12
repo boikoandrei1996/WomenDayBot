@@ -1,8 +1,3 @@
-# Bot mini demo can be seen [here][44]
-- card support
-- userdata save to cosmosdb
-- order save to cosmosdb
-
 # Prerequisites
 - .NET 2.1 [here][43]
 - Bot Framework Emulator [here][6]
@@ -11,27 +6,26 @@
 # Create CosmosDB database
 - start CosmosDB emulator
 - go to https://localhost:8081/_explorer/index.html
-- Create database WomanDayBot
+- Create database WomenDay
 - Create Collection
-    - Database id: WomanDayBot
+    - Database id: WomenDay
     - Collection Id: Orders
     - Partition key: /orderId
     - Throughput: 10000
     - Unique keys: /orderId
 - Create Collection
-    - Database id: WomanDayBot
-    - Collection Id: CardConfiguration
-    - Partition key: /cardconfigid
+    - Database id: WomenDay
+    - Collection Id: CardConfigs
+    - Partition key: /configId
     - Throughput: 10000
-    - Unique keys: /cardconfigid
-- Upload Documents for local development localted in the .\WomanDayBot\Data\CardConfiguration.json (upload may hand locally, create docs one by one then
-)
+    - Unique keys: /configId
+- Upload documents for local development located in the .\WomenDay\Data\CardConfigs.json (create docs one by one)
 
-# WomanDayBot
+# WomenDayBot
 Run the bot from a terminal or from Visual Studio.
     - Launch Visual Studio
     - File -> Open -> Project/Solution
-    - Select `<your_project_folder>/WomanDayBot.sln` file
+    - Select `<your_project_folder>/WomenDay.sln` file
     - Press `F5` to run the project
 
 # Testing the bot using Bot Framework Emulator **v4**
@@ -42,9 +36,9 @@ Run the bot from a terminal or from Visual Studio.
 ## Connect to the bot using Bot Framework Emulator **v4**
 - Launch Bot Framework Emulator
 - File -> Open Bot Configuration
-- Navigate to `<your_project_folder>/WomanDayBot` folder
-- Select `WomanDayBot.bot` file
-- Secret is stored in Azure Bot settings (ask in skype chat)
+- Navigate to `<your_project_folder>/WomenDay` folder
+- Select `*.bot` file
+- Secret is stored in Azure Bot settings
 
 # Further reading
 - [Bot Framework Documentation][20]

@@ -11,7 +11,7 @@ namespace WomenDay.Repositories
 
   public class OrderRepository : CosmosDbRepository<Order>
   {
-    private const string DatabaseId = "WomanDayBot";
+    private const string DatabaseId = "WomenDay";
     private const string CollectionId = "Orders";
 
     public OrderRepository(CosmosDbStorageOptions configurationOptions) 

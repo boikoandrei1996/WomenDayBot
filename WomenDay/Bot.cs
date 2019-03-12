@@ -20,7 +20,7 @@ namespace WomenDay
   public class Bot : IBot
   {
     private readonly ILogger<Bot> _logger;
-    private readonly WomanDayBotAccessors _accessors;
+    private readonly BotAccessors _accessors;
     private readonly MainDialogSet _mainDialogSet;
     private readonly UserState _userState;
     private readonly ConversationState _conversationState;
@@ -28,19 +28,19 @@ namespace WomenDay
     private readonly OrderRepository _orderRepository;
 
     public Bot(
-      ILoggerFactory loggerFactory,
-      WomanDayBotAccessors womanDayBotAccessors,
+      BotAccessors botAccessors,
       UserState userState,
       ConversationState conversationState,
       ICardService cardService,
-      OrderRepository orderRepository)
+      OrderRepository orderRepository,
+      ILogger<Bot> logger)
     {
-      _logger = loggerFactory.CreateLogger<Bot>();
-      _accessors = womanDayBotAccessors ?? throw new ArgumentNullException(nameof(womanDayBotAccessors));
+      _accessors = botAccessors ?? throw new ArgumentNullException(nameof(botAccessors));
       _userState = userState ?? throw new ArgumentNullException(nameof(userState));
       _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
       _cardService = cardService ?? throw new ArgumentNullException(nameof(cardService));
       _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
+      _logger = logger;
 
       _mainDialogSet = new MainDialogSet(_accessors.DialogStateAccessor);
     }
