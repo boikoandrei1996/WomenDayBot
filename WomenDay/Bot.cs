@@ -42,7 +42,7 @@ namespace WomenDay
       _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
       _logger = logger;
 
-      _mainDialogSet = new MainDialogSet(_accessors.DialogStateAccessor);
+      _mainDialogSet = new MainDialogSet(_accessors.DialogStateAccessor, new GreetingDialog(), new CategoryChooseDialog(), new UserNameValidator());
     }
 
     public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken)
@@ -60,13 +60,13 @@ namespace WomenDay
         if (string.IsNullOrEmpty(userData.Name) || string.IsNullOrEmpty(userData.Room))
         {
           // Start greeting dialog
-          await dialogContext.BeginDialogAsync(MainDialogSet.GreetingDialogId, null, cancellationToken);
+          await dialogContext.BeginDialogAsync(GreetingDialog.Id, null, cancellationToken);
         }
         else if (turnContext.Activity.Value == null)
         {
           // Start category choose dialog
           await turnContext.SendActivityAsync($"Хаю хай {userData.Name} из {userData.Room}.", cancellationToken: cancellationToken);
-          await dialogContext.BeginDialogAsync(MainDialogSet.CategoryChooseDialogId, null, cancellationToken);
+          await dialogContext.BeginDialogAsync(CategoryChooseDialog.Id, null, cancellationToken);
         }
         else
         {
@@ -88,7 +88,7 @@ namespace WomenDay
             cancellationToken);
 
           await turnContext.SendActivityAsync($"Добро пожаловать, {userData.Name} из {userData.Room}.", cancellationToken: cancellationToken);
-          await dialogContext.BeginDialogAsync(MainDialogSet.CategoryChooseDialogId, null, cancellationToken);
+          await dialogContext.BeginDialogAsync(CategoryChooseDialog.Id, null, cancellationToken);
         }
         else if (dialogTurnResult.Result is OrderCategory)
         {
@@ -115,8 +115,8 @@ namespace WomenDay
       order.RequestTime = DateTime.Now;
       order.UserData = userData;
 
-      var orderDoc = await _orderRepository.CreateItemAsync(order);
-      _logger.LogDebug("Created {orderDoc}", orderDoc);
+      var document = await _orderRepository.CreateDocumentAsync(order);
+      _logger.LogDebug("Created {orderDoc}", document);
     }
 
     private async Task ShowMenuAsync(

@@ -2,148 +2,109 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using Microsoft.Bot.Builder.Azure;
-using WomenDay.Models;
 
 namespace WomenDay.Repositories
 {
-  public class CosmosDbRepository<T> where T : class
+  public abstract class CosmosDbRepository<T>
+    where T : class
   {
-    internal readonly CosmosDbStorageOptions _configurationOptions;
-    internal readonly string _collectionId;
-    internal readonly string _databaseId;
-    private readonly DocumentClient _client;
-
-    public object DefaultOptions { get; private set; }
+    private readonly string _databaseId;
+    private readonly string _collectionId;
+    private readonly CosmosDbStorageOptions _dbStorageOptions;
+    private readonly Uri _collectionUri;
 
     public CosmosDbRepository(
       CosmosDbStorageOptions configurationOptions,
       string databaseId,
       string collectionId)
     {
-      _configurationOptions = configurationOptions;
-      _client = new DocumentClient(_configurationOptions.CosmosDBEndpoint, _configurationOptions.AuthKey);
-      _collectionId = collectionId;
       _databaseId = databaseId;
+      _collectionId = collectionId;
+      _dbStorageOptions = configurationOptions;
+      _collectionUri = UriFactory.CreateDocumentCollectionUri(databaseId, collectionId);
     }
 
-    public async Task<Order> GetItemAsync(string id)
+    public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate = null)
     {
-      var link = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-      var query = _client.CreateDocumentQuery<Order>(link, new SqlQuerySpec()
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
       {
-        QueryText = "SELECT * FROM Orders f WHERE (f.orderId = @id)",
-        Parameters = new SqlParameterCollection()
-                    {
-                        new SqlParameter("@id", id)
-                    }
-      }, new FeedOptions { EnableCrossPartitionQuery = true });
-      return query.ToList().SingleOrDefault();
-    }
+        IQueryable<T> query = client
+          .CreateDocumentQuery<T>(_collectionUri, new FeedOptions { EnableCrossPartitionQuery = true });
 
-    public async Task<IEnumerable<T>> GetItemsAsync()
-    {
-      using (var client = new DocumentClient(_configurationOptions.CosmosDBEndpoint, _configurationOptions.AuthKey))
-      {
-        var link = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-        var query = client.CreateDocumentQuery<T>(
-            link,
-            new FeedOptions()
-            {
-              EnableCrossPartitionQuery = true
-            })
-          .AsDocumentQuery();
+        if (predicate != null)
+        {
+          query = query.Where(predicate);
+        }
+
+        IDocumentQuery<T> documentQuery = query.AsDocumentQuery();
 
         var results = new List<T>();
-        while (query.HasMoreResults)
+        while (documentQuery.HasMoreResults)
         {
-          results.AddRange(await query.ExecuteNextAsync<T>());
+          results.AddRange(await documentQuery.ExecuteNextAsync<T>());
         }
+
         return results;
       }
     }
 
-    public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
+    public Document GetDocumentOrDefault(Expression<Func<Document, bool>> predicate)
     {
-      using (var client = new DocumentClient(_configurationOptions.CosmosDBEndpoint, _configurationOptions.AuthKey))
+      if (predicate == null)
       {
-        var link = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
-        var query = client.CreateDocumentQuery<T>(
-                            link,
-                            new FeedOptions()
-                            {
-                              EnableCrossPartitionQuery = true
-                            })
-                         .Where(predicate)
-                        .AsDocumentQuery();
+        throw new ArgumentNullException(nameof(predicate));
+      }
 
-        var results = new List<T>();
-        while (query.HasMoreResults)
-        {
-          results.AddRange(await query.ExecuteNextAsync<T>());
-        }
-        return results;
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
+      {
+        var doc = client
+          .CreateDocumentQuery<Document>(_collectionUri, new FeedOptions { EnableCrossPartitionQuery = true })
+          .Where(predicate)
+          .AsEnumerable()
+          .FirstOrDefault();
+
+        return doc;
       }
     }
 
-    public async Task<Document> CreateItemAsync(T item)
+    public async Task<Document> CreateDocumentAsync(T item)
     {
-      return await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId), item);
-    }
-
-    public async Task<Document> UpdateItemAsync(string id, T item)
-    {
-      return await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId), item);
-    }
-
-    public async Task DeleteItemAsync(string id)
-    {
-      await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseId, _collectionId, id));
-    }
-
-    private async Task CreateDatabaseIfNotExistsAsync()
-    {
-      try
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
       {
-        await _client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(_databaseId));
-      }
-      catch (DocumentClientException e)
-      {
-        if (e.StatusCode == HttpStatusCode.NotFound)
-        {
-          await _client.CreateDatabaseAsync(new Database { Id = _databaseId });
-        }
-        else
-        {
-          throw;
-        }
+        return await client.CreateDocumentAsync(_collectionUri, item);
       }
     }
 
-    private async Task CreateCollectionIfNotExistsAsync()
+    public async Task<Document> UpdateDocumentAsync(Document document)
     {
-      try
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
       {
-        await _client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId));
+        return await client.ReplaceDocumentAsync(document);
       }
-      catch (DocumentClientException e)
+    }
+
+    public async Task<Document> UpdateDocumentAsync(string documentId, T item)
+    {
+      var documentUri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, documentId);
+
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
       {
-        if (e.StatusCode == HttpStatusCode.NotFound)
-        {
-          await _client.CreateDocumentCollectionAsync(
-            UriFactory.CreateDatabaseUri(_databaseId),
-            new DocumentCollection { Id = _collectionId },
-            new RequestOptions { OfferThroughput = 1000 });
-        }
-        else
-        {
-          throw;
-        }
+        return await client.ReplaceDocumentAsync(documentUri, item);
+      }
+    }
+
+    public async Task<ResourceResponse<Document>> DeleteDocumentAsync(string documentId)
+    {
+      var documentUri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, documentId);
+
+      using (var client = new DocumentClient(_dbStorageOptions.CosmosDBEndpoint, _dbStorageOptions.AuthKey))
+      {
+        return await client.DeleteDocumentAsync(documentUri);
       }
     }
   }

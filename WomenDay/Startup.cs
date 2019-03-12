@@ -14,6 +14,7 @@ using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using WomenDay.Infrastructure;
 using WomenDay.Models;
 using WomenDay.Repositories;
 using WomenDay.Services;
@@ -115,7 +116,6 @@ namespace WomenDay
       services.AddSingleton<CardConfigurationRepository>();
 
       // Register services
-      services.AddSingleton<ICardConfigurationService, CardConfigurationService>();
       services.AddSingleton<ICardService, CardService>();
 
       // Register bot

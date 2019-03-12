@@ -1,4 +1,4 @@
-﻿namespace WomenDay.Models
+﻿namespace WomenDay.Infrastructure
 {
   public class CosmosDBSettings
   {

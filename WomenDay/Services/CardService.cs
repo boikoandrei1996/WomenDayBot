@@ -7,6 +7,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WomenDay.Models;
+using WomenDay.Repositories;
 
 namespace WomenDay.Services
 {
@@ -18,28 +19,24 @@ namespace WomenDay.Services
   public class CardService : ICardService
   {
     private readonly ILogger<CardService> _logger;
-    private readonly ICardConfigurationService _cardConfigurationService;
+    private readonly CardConfigurationRepository _cardConfigurationRepository;
 
-    public CardService(ILoggerFactory loggerFactory, ICardConfigurationService cardConfigurationService)
+    public CardService(
+      ILogger<CardService> logger, 
+      CardConfigurationRepository cardConfigurationRepository)
     {
-      _logger = loggerFactory.CreateLogger<CardService>();
-      _cardConfigurationService = cardConfigurationService;
+      _logger = logger;
+      _cardConfigurationRepository = cardConfigurationRepository;
     }
 
-    public Task<List<Attachment>> CreateAttachmentsAsync(OrderCategory category)
+    public async Task<List<Attachment>> CreateAttachmentsAsync(OrderCategory category)
     {
-      return this.CreateAdaptiveCardAttachmentAsync(category);
-    }
-
-    private async Task<List<Attachment>> CreateAdaptiveCardAttachmentAsync(OrderCategory category)
-    {
-      string[] paths = { ".", "Templates", "CardTemplate.json" };
-      var fullPath = Path.Combine(paths);
+      var fullPath = Path.Combine(".", "Templates", "CardTemplate.json");
       var adaptiveCardTemplate = File.ReadAllText(fullPath);
 
       var cards = new List<Attachment>();
 
-      var cardConfigurations = await _cardConfigurationService.GetCardConfigurationsAsync();
+      var cardConfigurations = await _cardConfigurationRepository.GetItemsAsync();
 
       if (category != OrderCategory.All)
       {

@@ -7,7 +7,7 @@ export const actionCreators = {
 
     dispatch({ type: REQUEST_ORDERS });
 
-    const url = `api/Orders/GetOrdersAsync`;
+    const url = `api/orders/all`;
     const response = await fetch(url);
     const orders = await response.json();
 
@@ -20,7 +20,7 @@ export const actionCreators = {
     const index = orders.findIndex(obj => obj.orderId === orderId);
 
     orders[index].isComplete = isComplete;
-    const url = `api/Orders/UpdateOrderAsync`;
+    const url = `api/orders`;
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
