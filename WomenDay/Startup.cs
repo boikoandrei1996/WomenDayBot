@@ -22,19 +22,20 @@ namespace WomenDay
 {
   public class Startup
   {
+    private const string ProductionName = "production";
+    private const string DevelopmentName = "development";
+
     private readonly ILogger<Bot> _logger;
+    private readonly IConfiguration _configuration;
+    private readonly IHostingEnvironment _hostingEnvironment;
 
-    public IConfiguration Configuration { get; }
-
-    public IHostingEnvironment HostingEnvironment { get; }
-
-    public Startup(IHostingEnvironment env, ILoggerFactory loggerFactory)
+    public Startup(
+      IHostingEnvironment env, 
+      ILogger<Bot> logger)
     {
-      _logger = loggerFactory.CreateLogger<Bot>();
-
-      HostingEnvironment = env;
-
-      Configuration = new ConfigurationBuilder()
+      _hostingEnvironment = env;
+      _logger = logger;
+      _configuration = new ConfigurationBuilder()
         .SetBasePath(env.ContentRootPath)
         .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
         .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
@@ -44,7 +45,8 @@ namespace WomenDay
 
     public void ConfigureServices(IServiceCollection services)
     {
-      var botSettings = Configuration.GetSection("BotSettings").Get<BotSettings>();
+      var botSettings = _configuration.GetSection("BotSettings").Get<BotSettings>();
+      var cosmosdbSettings = _configuration.GetSection("CosmosDB").Get<CosmosDBSettings>();
 
       if (File.Exists(botSettings.FilePath) == false)
       {
@@ -70,19 +72,18 @@ namespace WomenDay
 
       services.AddSingleton<BotConfiguration>(botConfig);
 
-      // Add BotServices singleton.
       // Create the connected services from .bot file.
-      services.AddSingleton<BotServices>(new BotServices(botConfig));
+      // services.AddSingleton<BotServices>(new BotServices(botConfig));
 
-      var isProduction = HostingEnvironment.IsProduction();
+      var isProduction = _hostingEnvironment.IsProduction();
 
       // Retrieve current endpoint.
-      var environment = isProduction ? "production" : "development";
+      var environment = isProduction ? Startup.ProductionName : Startup.DevelopmentName;
       var service = botConfig.Services.FirstOrDefault(s => s.Type == "endpoint" && s.Name == environment);
       if (service == null && isProduction)
       {
         // Attempt to load development environment
-        service = botConfig.Services.FirstOrDefault(s => s.Type == "endpoint" && s.Name == "development");
+        service = botConfig.Services.FirstOrDefault(s => s.Type == "endpoint" && s.Name == Startup.DevelopmentName);
       }
 
       if (!(service is EndpointService endpointService))
@@ -90,7 +91,6 @@ namespace WomenDay
         throw new InvalidOperationException($"The .bot file does not contain an endpoint with name '{environment}'.");
       }
 
-      var cosmosdbSettings = Configuration.GetSection("CosmosDB").Get<CosmosDBSettings>();
       var cosmosDbStorageOptions = new CosmosDbStorageOptions
       {
         DatabaseId = cosmosdbSettings.DatabaseId,
@@ -103,8 +103,10 @@ namespace WomenDay
 
       // Register state models
       var dataStore = new CosmosDbStorage(cosmosDbStorageOptions);
+
       var conversationState = new ConversationState(dataStore);
       services.AddSingleton(conversationState);
+
       var userState = new UserState(dataStore);
       services.AddSingleton(userState);
 
@@ -116,6 +118,7 @@ namespace WomenDay
       services.AddSingleton<ICardConfigurationService, CardConfigurationService>();
       services.AddSingleton<ICardService, CardService>();
 
+      // Register bot
       services.AddBot<Bot>(options =>
       {
         options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
@@ -127,6 +130,7 @@ namespace WomenDay
         };
       });
 
+      // Register accessors
       services.AddSingleton<BotAccessors>(new BotAccessors(userState, conversationState)
       {
         UserDataAccessor = userState.CreateProperty<UserData>("WomenDayBot.UserData"),
@@ -138,15 +142,15 @@ namespace WomenDay
         .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
       // In production, the React files will be served from this directory
-      services.AddSpaStaticFiles(configuration =>
+      services.AddSpaStaticFiles(options =>
       {
-        configuration.RootPath = "ClientApp/build";
+        options.RootPath = "ClientApp/build";
       });
     }
 
     public void Configure(IApplicationBuilder app)
     {
-      var development = HostingEnvironment.IsDevelopment();
+      var development = _hostingEnvironment.IsDevelopment();
       if (development)
       {
         app.UseDeveloperExceptionPage();

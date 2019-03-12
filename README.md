@@ -6,15 +6,15 @@
 # Create CosmosDB database
 - start CosmosDB emulator
 - go to https://localhost:8081/_explorer/index.html
-- Create database WomenDay
+- Create database WomenDayBot
 - Create Collection
-    - Database id: WomenDay
+    - Database id: WomenDayBot
     - Collection Id: Orders
     - Partition key: /orderId
     - Throughput: 10000
     - Unique keys: /orderId
 - Create Collection
-    - Database id: WomenDay
+    - Database id: WomenDayBot
     - Collection Id: CardConfigs
     - Partition key: /configId
     - Throughput: 10000

@@ -33,7 +33,7 @@ namespace WomenDay.Services
 
     private async Task<List<Attachment>> CreateAdaptiveCardAttachmentAsync(OrderCategory category)
     {
-      string[] paths = { ".", "Templates", "orderCard.json" };
+      string[] paths = { ".", "Templates", "CardTemplate.json" };
       var fullPath = Path.Combine(paths);
       var adaptiveCardTemplate = File.ReadAllText(fullPath);
 

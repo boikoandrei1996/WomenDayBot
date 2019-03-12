@@ -5,7 +5,7 @@ namespace WomenDay.Repositories
 {
   public class CardConfigurationRepository : CosmosDbRepository<CardConfiguration>
   {
-    private const string DatabaseId = "WomenDay";
+    private const string DatabaseId = "WomenDayBot";
     private const string CollectionId = "CardConfigs";
 
     public CardConfigurationRepository(CosmosDbStorageOptions configurationOptions)
